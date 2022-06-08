@@ -1,8 +1,6 @@
 package com.apigatewayservice.filter;
 
 import io.jsonwebtoken.Jwts;
-import io.jsonwebtoken.SignatureAlgorithm;
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.cloud.gateway.filter.GatewayFilter;
 import org.springframework.cloud.gateway.filter.factory.AbstractGatewayFilterFactory;
@@ -17,13 +15,16 @@ import reactor.core.publisher.Mono;
 
 @Slf4j
 @Component
-@RequiredArgsConstructor
 public class AuthorizationHeaderFilter extends AbstractGatewayFilterFactory<AuthorizationHeaderFilter.Config> {
 
     private final Environment env;
 
-    public static class Config {
+    public AuthorizationHeaderFilter(Environment env) {
+        super(AuthorizationHeaderFilter.Config.class);
+        this.env = env;
+    }
 
+    public static class Config {
     }
 
     @Override
@@ -35,7 +36,7 @@ public class AuthorizationHeaderFilter extends AbstractGatewayFilterFactory<Auth
                 return onError(exchange, "No authorization header.", HttpStatus.UNAUTHORIZED);
 
             String authorizationHeader = request.getHeaders().get(HttpHeaders.AUTHORIZATION).get(0);
-            String jwt = authorizationHeader.replace("bearer", "");
+            String jwt = authorizationHeader.replace("Bearer", "");
 
             if (!isJwtValid(jwt))
                 return onError(exchange, "JWT token is not valid.", HttpStatus.UNAUTHORIZED);
